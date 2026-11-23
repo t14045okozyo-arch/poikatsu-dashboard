@@ -1,0 +1,964 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>ポイ活ダッシュボード（公開用）｜@pokatuotoku</title>
+<style>
+  :root{
+    --bg:#f6f7f4;
+    --surface:#ffffff;
+    --surface2:#eef2e8;
+    --ink:#1a2318;
+    --muted:#5b6b58;
+    --line:#dbe3d5;
+    --accent:#1a7a3c;
+    --accent-ink:#ffffff;
+    --hot:#d94f1e;
+    --hot-bg:#fff1e8;
+    --gold:#8a6d00;
+    --gold-bg:#fff8d6;
+    --chip:#e8efe2;
+    --radius:14px;
+    --radius-sm:10px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#121612;
+      --surface:#1c221c;
+      --surface2:#232b23;
+      --ink:#eef3ec;
+      --muted:#a7b8a3;
+      --line:#334033;
+      --accent:#4cc46e;
+      --accent-ink:#0d1a10;
+      --hot:#ff8a5c;
+      --hot-bg:#3a2115;
+      --gold:#ffd94d;
+      --gold-bg:#332e10;
+      --chip:#2a332a;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Noto Sans JP",system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent)}
+  button,[role="button"]{min-height:44px}
+  .wrap{max-width:880px;margin:0 auto;padding:0 16px 48px}
+  /* PR bar */
+  .pr-bar{background:var(--ink);color:var(--bg);text-align:center;font-size:13px;font-weight:700;letter-spacing:.02em;padding:10px 16px;line-height:1.5}
+  /* header */
+  .hero{padding:28px 0 8px}
+  .hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .kicker{font-size:13px;font-weight:700;color:var(--accent);letter-spacing:.06em}
+  h1{font-size:30px;line-height:1.25;margin:6px 0 8px;font-weight:900;letter-spacing:-.02em}
+  @media(min-width:640px){h1{font-size:38px}}
+  .hero p.lead{margin:0;color:var(--muted);font-size:15px;max-width:38em}
+  .account{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:14px;font-weight:700;text-decoration:none;color:var(--ink);min-height:44px}
+  .account span{color:var(--muted);font-weight:400;font-size:13px}
+  .freshness{margin-top:16px;background:var(--gold-bg);border:1px solid color-mix(in srgb, var(--gold) 30%, transparent);color:var(--ink);border-radius:var(--radius-sm);padding:12px 14px;font-size:13.5px;line-height:1.6}
+  .freshness strong{color:var(--gold)}
+  /* stats */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0 4px}
+  .stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 12px;text-align:center}
+  .stat b{display:block;font-size:22px;line-height:1.1;font-weight:900}
+  .stat span{font-size:12px;color:var(--muted)}
+  /* nav */
+  .nav{position:sticky;top:0;z-index:20;background:color-mix(in srgb, var(--bg) 92%, transparent);backdrop-filter:blur(8px);padding:12px 0 8px;margin-top:8px}
+  .nav-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+  .nav-row::-webkit-scrollbar{display:none}
+  .nav a{flex:0 0 auto;text-decoration:none;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:10px 16px;font-size:14px;font-weight:700;min-height:44px;display:inline-flex;align-items:center}
+  .nav a.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+  /* filters */
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 4px}
+  .filters button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 16px;font-size:14px;font-weight:700;cursor:pointer;min-height:44px}
+  .filters button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  section{margin-top:32px}
+  h2{font-size:22px;margin:0 0 4px;font-weight:900;letter-spacing:-.01em}
+  .sec-sub{color:var(--muted);font-size:14px;margin:0 0 16px}
+  /* deal cards */
+  .deal{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:12px}
+  .deal-head{display:flex;gap:12px;align-items:flex-start}
+  .rank{flex:0 0 auto;width:40px;height:40px;border-radius:10px;background:var(--surface2);display:grid;place-items:center;font-weight:900;font-size:17px}
+  .rank.top{background:var(--hot);color:#fff}
+  .deal-title{flex:1;min-width:0}
+  .deal-title h3{margin:0;font-size:17px;line-height:1.4;font-weight:800}
+  .deal-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .tag{font-size:12px;font-weight:700;background:var(--chip);border-radius:999px;padding:3px 10px}
+  .tag.deadline{background:var(--hot-bg);color:var(--hot)}
+  .tag.fee{background:var(--gold-bg);color:var(--gold)}
+  .amount{text-align:right;flex:0 0 auto}
+  .amount b{display:block;font-size:24px;line-height:1;font-weight:900;color:var(--hot)}
+  .amount span{font-size:11px;color:var(--muted)}
+  @media(max-width:520px){.deal-head{flex-wrap:wrap}.amount{text-align:left;padding-left:52px;margin-top:-6px}}
+  .compare{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
+  .compare-title{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.04em;margin-bottom:8px}
+  .bar-row{display:grid;grid-template-columns:132px 1fr 76px;gap:8px;align-items:center;font-size:13px;margin-bottom:6px}
+  .bar-row .site{font-weight:700;line-height:1.35;overflow-wrap:anywhere}
+  @media(max-width:520px){.bar-row{grid-template-columns:104px 1fr 70px;font-size:12.5px}}
+  .bar-track{height:10px;background:var(--surface2);border-radius:999px;overflow:hidden}
+  .bar-fill{height:100%;background:var(--accent);border-radius:999px}
+  .bar-row.best .bar-fill{background:var(--hot)}
+  .bar-row .val{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+  .cond{font-size:14px;margin:12px 0 0}
+  .cond dt{font-weight:800;font-size:12px;color:var(--muted);letter-spacing:.04em}
+  .cond dd{margin:2px 0 8px}
+  .note{font-size:13.5px;background:var(--surface2);border-radius:var(--radius-sm);padding:10px 12px;margin-top:10px}
+  .official{font-size:13px;margin-top:10px;word-break:break-all}
+  .howto{font-size:13px;margin-top:8px;color:var(--muted);background:var(--surface2);border-radius:var(--radius-sm);padding:9px 12px}
+  .howto strong{color:var(--ink)}
+  /* deadline list */
+  .dl{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  .dl-row{display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);align-items:baseline}
+  .dl-row:last-child{border-bottom:none}
+  .dl-date{flex:0 0 92px;font-weight:900;font-size:14px;color:var(--hot);font-variant-numeric:tabular-nums}
+  .dl-body{flex:1;min-width:0}
+  .dl-body b{font-size:14.5px}
+  .dl-body span{display:block;font-size:13px;color:var(--muted)}
+  .dl-amt{font-weight:900;white-space:nowrap;font-size:14px}
+  @media(max-width:520px){.dl-row{flex-wrap:wrap}.dl-date{flex-basis:auto}}
+  /* links */
+  .link-grid{display:grid;gap:12px}
+  @media(min-width:640px){.link-grid{grid-template-columns:1fr 1fr}}
+  .link-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+  .link-card h3{margin:0 0 4px;font-size:16px}
+  .link-card p{margin:0 0 12px;font-size:13.5px;color:var(--muted)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--accent);color:var(--accent-ink);text-decoration:none;font-weight:800;font-size:15px;border-radius:10px;padding:12px 18px;min-height:48px;width:100%;border:none;cursor:pointer}
+  .btn.secondary{background:var(--ink);color:var(--bg)}
+  .code-box{display:flex;gap:8px;align-items:stretch}
+  .code-box code{flex:1;background:var(--surface2);border:1px dashed var(--line);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:19px;font-weight:700;letter-spacing:.14em;padding:10px}
+  .code-box button{flex:0 0 auto}
+  .copied{font-size:13px;color:var(--accent);font-weight:700;min-height:20px;margin-top:6px}
+  footer{margin-top:40px;border-top:1px solid var(--line);padding-top:20px;color:var(--muted);font-size:13px;line-height:1.7}
+
+  /* ease tags + controls (added) */
+  :root{ --ease-bg:#e2f3e5; --ease-ink:#14632e; --ease-line:#9fd3ab; --limit-bg:#fdeeda; --limit-ink:#8a4b00; }
+  @media (prefers-color-scheme: dark){ :root{ --ease-bg:#17301d; --ease-ink:#7ed492; --ease-line:#2f5a39; --limit-bg:#38270e; --limit-ink:#ffb86b; } }
+  .tag.ease{background:var(--ease-bg);color:var(--ease-ink);border:1px solid var(--ease-line)}
+  .tag.cost{background:var(--gold-bg);color:var(--gold);border:1px solid color-mix(in srgb, var(--gold) 35%, transparent)}
+  .tag.limit{background:var(--limit-bg);color:var(--limit-ink);border:1px solid color-mix(in srgb, var(--limit-ink) 30%, transparent)}
+  .tag.deadline-badge{background:var(--hot);color:#fff;border:1px solid var(--hot)}
+  .tag.nodeadline{background:transparent;color:var(--muted);border:1px dashed var(--line)}
+  .controls{margin-top:6px}
+  .control-label{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.05em;margin:14px 0 2px}
+  .ease-filters{margin-top:6px}
+  .ease-filters button.easy-btn{border-color:var(--ease-line);background:var(--ease-bg);color:var(--ease-ink)}
+  .ease-filters button.easy-btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .sort-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px}
+  .sort-row .control-label{margin:0}
+  .sort-filters{margin:0}
+  .sort-note{font-size:13px;color:var(--muted);margin:6px 0 0;flex-basis:100%}
+  .legend{font-size:13px;color:var(--muted);margin:10px 0 0;line-height:1.7}
+  .legend .tag{margin-right:4px;vertical-align:middle}
+  .hidden{display:none !important}
+
+  /* topic tags + spotlight (added) */
+  :root{ --sns-bg:#e3f0fb; --sns-ink:#14558c; --sns-line:#9cc3e8; }
+  @media (prefers-color-scheme: dark){ :root{ --sns-bg:#16293c; --sns-ink:#8ec3f5; --sns-line:#2f567c; } }
+  .tag.topic-up{background:var(--hot-bg);color:var(--hot);border:1px solid color-mix(in srgb, var(--hot) 45%, transparent);font-weight:800}
+  .tag.topic-sns{background:var(--sns-bg);color:var(--sns-ink);border:1px solid var(--sns-line);font-weight:800}
+  .spot-grid{display:grid;gap:12px}
+  @media(min-width:760px){.spot-grid{grid-template-columns:repeat(3,1fr)}}
+  .spot-card{background:var(--surface);border:1px solid color-mix(in srgb, var(--hot) 40%, var(--line));border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:8px}
+  .spot-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+  .spot-no{font-size:12px;font-weight:900;color:var(--hot);letter-spacing:.06em}
+  .spot-amt{font-size:21px;font-weight:900;color:var(--hot);line-height:1.1;white-space:nowrap}
+  .spot-card h3{margin:0;font-size:16px;line-height:1.45;font-weight:800}
+  .spot-tags{display:flex;flex-wrap:wrap;gap:6px}
+  .spot-card p{margin:0;font-size:13.5px;color:var(--muted);line-height:1.65;flex:1}
+  .spot-card p strong{color:var(--ink)}
+  .spot-link{font-size:14px;font-weight:800;text-decoration:none;min-height:44px;display:inline-flex;align-items:center}
+</style>
+</head>
+<body>
+<div class="pr-bar">本ページにはプロモーション（アフィリエイトリンク）が含まれます</div>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="hero-top">
+      <div>
+        <div class="kicker">SNSポイ活まとめ ・ 公開用ダッシュボード</div>
+        <h1>今おいしい案件を、<br>火力順にひと目で。</h1>
+        <p class="lead">XなどSNSで話題のポイ活案件を、火力順・締切順にまとめたページです。複数のポイントサイトの還元額を案件ごとに比べているので、今日チェックしたい案件は、まずここを見れば分かります。</p>
+      </div>
+      <a class="account" href="https://x.com/pokatuotoku" target="_blank" rel="noopener">X @pokatuotoku <span>フォローする →</span></a>
+    </div>
+    <div class="freshness"><strong>ご確認ください：</strong>2026年11月23日時点の情報です。金額・条件は変更される場合があります。お申し込み前に各公式ページでご確認ください。</div>
+    <div class="stats">
+      <div class="stat"><b>30件</b><span>掲載中の案件</span></div>
+      <div class="stat"><b>80,000円分</b><span>最高還元（プロパティエージェント）</span></div>
+      <div class="stat"><b>11/23</b><span>直近の締切が集中</span></div>
+    </div>
+  </header>
+
+  <nav class="nav" aria-label="ページ内メニュー">
+    <div class="nav-row">
+      <a class="primary" href="#today">🔥 今日の注目</a>
+      <a href="#ranking">火力ランキング</a>
+      <a href="#deadlines">締切一覧</a>
+      <a href="#links">紹介リンク</a>
+    </div>
+  </nav>
+
+  <section id="today" style="margin-top:24px">
+    <h2>🔥 今日の注目</h2>
+    <p class="sec-sub">締切が迫る過去最高の案件や、複数サイトで増額中の案件の中から、まずチェックしたい6件を選びました（2026年11月23日時点）。迷ったら、まずこの6件と締切一覧をチェックしてみてください。</p>
+    <div class="spot-grid">
+      <div class="spot-card">
+        <div class="spot-top"><span class="spot-no">注目 1</span><span class="spot-amt">80,000円分</span></div>
+        <h3>プロパティエージェント 不動産投資WEB面談</h3>
+        <p>ランキング<strong>最上位の80,000円分</strong>です。PC／タブレットでカメラONのWEB面談完了が条件で、対象は昨年度の本業年収600万円以上・25〜55歳・社会人歴3年以上の正社員の方に限られます。</p>
+        <a class="spot-link" href="#deal-property">詳細とサイト別比較を見る ↓</a>
+      </div>
+      <div class="spot-card">
+        <div class="spot-top"><span class="spot-no">注目 2</span><span class="spot-amt">19,000円分</span></div>
+        <h3>SBI証券 新規口座開設・入金</h3>
+        <div class="spot-tags"><span class="tag ease">取引不要</span></div>
+        <p>本日15,000円分から<strong>19,000円分へ増額</strong>しました。新規口座開設＋50,000円以上の入金で、取引は不要です。SBI証券こども口座（13,000円）とは別案件です。</p>
+        <a class="spot-link" href="#deal-sbi">詳細とサイト別比較を見る ↓</a>
+      </div>
+      <div class="spot-card">
+        <div class="spot-top"><span class="spot-no">注目 3</span><span class="spot-amt">20,000円分</span></div>
+        <h3>楽天銀行 口座開設</h3>
+        <div class="spot-tags"><span class="tag topic-up">過去最高</span><span class="tag deadline-badge">⏰ 今日まで ・ 11/23まで</span><span class="tag ease">口座開設だけ</span><span class="tag ease">取引不要</span></div>
+        <p><strong>三連休限定・過去最高額</strong>の銀行口座案件です。新規口座開設＋初回ログインだけで、入金・取引は不要。純粋に20,000円分の見込みです。</p>
+        <a class="spot-link" href="#deal-rakuten-bank">詳細とサイト別比較を見る ↓</a>
+      </div>
+      <div class="spot-card">
+        <div class="spot-top"><span class="spot-no">注目 4</span><span class="spot-amt">7,200円分</span></div>
+        <h3>DMM JCBカード</h3>
+        <div class="spot-tags"><span class="tag topic-up">一斉増額</span><span class="tag deadline-badge">⏰ 今日まで ・ 11/23まで</span><span class="tag ease">無料でできる</span></div>
+        <p>本日<strong>3,500円分から7,200円分へ倍増</strong>したカード案件です。締切は本日11/23まで。年会費無料で、条件は新規カード発行＋発行月の翌月末までにDMMサイト内で1円以上の利用です。</p>
+        <a class="spot-link" href="#deal-dmm-jcb">詳細とサイト別比較を見る ↓</a>
+      </div>
+      <div class="spot-card">
+        <div class="spot-top"><span class="spot-no">注目 5</span><span class="spot-amt">13,000円</span></div>
+        <h3>みずほ銀行 子ども口座開設</h3>
+        <div class="spot-tags"><span class="tag topic-up">一斉増額</span><span class="tag deadline-badge">⏰ 今日まで ・ 11/23まで</span><span class="tag ease">口座開設だけ</span><span class="tag ease">無料でできる</span></div>
+        <p>三連休限定で<strong>3サイトが一斉増額</strong>し、ハピタスは13,000円になりました。入金・取引は不要です。<strong>親のみずほ銀行口座13,000円＋子ども口座13,000円＋SBIこども口座13,000円＝親子3口座で39,000円分が見込み</strong>です。</p>
+        <a class="spot-link" href="#deal-mizuho-child">詳細とサイト別比較を見る ↓</a>
+      </div>
+      <div class="spot-card">
+        <div class="spot-top"><span class="spot-no">注目 6</span><span class="spot-amt">27,000円分</span></div>
+        <h3>dカード GOLD</h3>
+        <div class="spot-tags"><span class="tag topic-up">過去最高</span><span class="tag topic-up">一斉増額</span><span class="tag deadline-badge">⏰ あと7日 ・ 11/30まで</span><span class="tag ease">カード発行だけ</span></div>
+        <p>22,000円分から<strong>27,000円分へ増額し、過去最高額</strong>になりました。5サイト同額で、公式入会特典（最大7,400pt）と合わせると最大34,400円相当の見込みです。年会費11,000円（税込・初年度から）がかかります。</p>
+        <a class="spot-link" href="#deal-dcard">詳細とサイト別比較を見る ↓</a>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <div class="filters cat-filters" role="group" aria-label="カテゴリで絞り込む">
+    <button type="button" data-filter="all" aria-pressed="true">すべて</button>
+    <button type="button" data-filter="card" aria-pressed="false">カード</button>
+    <button type="button" data-filter="account" aria-pressed="false">口座・証券・FX</button>
+    <button type="button" data-filter="telecom" aria-pressed="false">通信・回線</button>
+    <button type="button" data-filter="other" aria-pressed="false">その他</button>
+  </div>
+
+
+  <div class="controls">
+    <div class="control-label">手軽さで絞り込む</div>
+    <div class="filters ease-filters" role="group" aria-label="手軽さで絞り込む">
+      <button type="button" data-ease-filter="all" aria-pressed="true">すべて</button>
+      <button type="button" data-ease-filter="easy" aria-pressed="false" class="easy-btn">✋ 手軽な案件だけ</button>
+      <button type="button" data-ease-filter="open" aria-pressed="false">口座開設だけ</button>
+      <button type="button" data-ease-filter="notrade" aria-pressed="false">取引不要</button>
+      <button type="button" data-ease-filter="free" aria-pressed="false">無料でできる</button>
+      <button type="button" data-ease-filter="cardonly" aria-pressed="false">カード発行だけ</button>
+      <button type="button" data-ease-filter="monthly" aria-pressed="false">要：月額費用</button>
+      <button type="button" data-ease-filter="limited" aria-pressed="false">対象が限られます</button>
+    </div>
+    <div class="sort-row">
+      <span class="control-label">並び替え</span>
+      <div class="filters sort-filters" role="group" aria-label="並び替え">
+        <button type="button" data-sort="power" aria-pressed="true">🔥 火力順</button>
+        <button type="button" data-sort="deadline" aria-pressed="false">⏰ 締切が近い順</button>
+      </div>
+      <p class="sort-note" id="sortNote">いまは火力順（還元額の高い順）で並んでいます。締切バッジの「あと○日」は2026年11月23日時点の目安です。</p>
+    </div>
+    <p class="legend">タグの見方：<span class="tag ease">口座開設だけ</span><span class="tag ease">取引不要</span><span class="tag ease">無料でできる</span><span class="tag ease">カード発行だけ</span> は手軽さの目安、<span class="tag cost">要：月額費用</span> は継続費用がかかるもの、<span class="tag limit">対象が限られます</span> は対象者が限定されるものです。話題タグ：<span class="tag topic-sns">SNSで話題</span> はSNSのポイ活系アカウントで複数取り上げられている案件、<span class="tag topic-up">一斉増額</span> は複数のポイントサイトで同日に増額した案件です。各案件の条件欄もあわせてご確認ください。</p>
+  </div>
+
+  <section id="ranking">
+    <h2>🔥 火力ランキング</h2>
+    <p class="sec-sub">デフォルトは還元額の高い順（火力順）です。上の「締切が近い順」に切り替えると、締切が設定されている案件から順に並び、締切なし・未定の案件は後ろになります。各カードの手軽さタグでも絞り込めます。還元額の高い順です。バーが一番長いサイトが、その案件で一番お得な経由先です。年会費などがかかる案件は「実質の見込み」も併記しています。各案件の「公式ページ」は条件の確認用です。ポイントサイト経由の還元を受ける場合は、公式ページから直接申し込まず、下の紹介リンクからポイントサイトに登録して、サイト内で案件名を検索して申し込んでください。</p>
+    <div id="dealList">
+
+      <!-- 1 -->
+      <article class="deal" id="deal-property" data-cat="other" data-ease="" data-deadline="" data-order="0">
+        <div class="deal-head">
+          <div class="rank top">1</div>
+          <div class="deal-title"><h3>プロパティエージェント 不動産投資WEB面談</h3><div class="deal-meta"><span class="tag">不動産投資</span><span class="tag">WEB面談</span><span class="tag nodeadline">締切なし・未定</span></div></div>
+          <div class="amount"><b>80,000円分</b><span>モッピー経由</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">80,000円分</span></div>
+          <div class="bar-row"><span class="site">ハピタス</span><div class="bar-track"><div class="bar-fill" style="width:81%"></div></div><span class="val">65,000円分</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>PC／タブレットでカメラONのWEB面談完了＋面談後2週間以内に指定フォームへの回答。お申し込み後2週間以内に日程調整を行い、60日以内に面談を実施してください。対象は、昨年度の本業の個人年収600万円以上・25〜55歳・社会人歴3年以上・正社員の方です（試用期間中・育休中の方は対象外）。</dd></dl>
+        <div class="note">提携金融機関の融資が受けられない場合や、過去に同社の面談・セミナーを受けたことがある方は対象外です。ポイント付与は参加後60日前後です。金額は変動しやすいため、申込前に広告ページで金額を確認してください。</div>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからモッピーに登録後、サイト内で「プロパティエージェント」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 2 -->
+<article class="deal" data-cat="telecom" data-ease="monthly" data-deadline="" data-order="1">
+        <div class="deal-head">
+          <div class="rank top">2</div>
+          <div class="deal-title"><h3>SoftBank Air</h3><div class="deal-meta"><span class="tag">通信・回線</span><span class="tag">自宅Wi-Fi</span><span class="tag cost">要：月額費用</span><span class="tag nodeadline">締切なし・未定</span></div></div>
+          <div class="amount"><b>50,000円</b><span>モッピー経由</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">50,000円</span></div>
+          <div class="bar-row best"><span class="site">ポイントインカム</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">50,000円</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>新規お申し込み＋取次店（代理店NEXT）経由での開通完了</dd></dl>
+        <div class="note">月額5,368円がかかります。自宅のWi-Fiをこれから契約・乗り換えする方に向いています。</div>
+        <p class="official">公式ページ：<a href="https://www.softbank.jp/internet/air/" target="_blank" rel="noopener">softbank.jp/internet/air/</a>（料金・対応エリアの確認はこちら）</p>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからモッピーに登録後、サイト内で「SoftBank Air」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 3 -->
+<article class="deal" id="deal-tau" data-cat="other" data-ease="limited" data-deadline="" data-order="2">
+        <div class="deal-head">
+          <div class="rank top">3</div>
+          <div class="deal-title"><h3>事故車買取のタウ</h3><div class="deal-meta"><span class="tag">買取</span><span class="tag topic-up">一斉増額</span><span class="tag limit">対象が限られます</span><span class="tag nodeadline">締切なし・未定</span></div></div>
+          <div class="amount"><b>32,000円</b><span>モッピー経由</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">ちょびリッチ</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">35,000円</span></div>
+          <div class="bar-row"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:91%"></div></div><span class="val">32,000円</span></div>
+          <div class="bar-row"><span class="site">ポイントインカム</span><div class="bar-track"><div class="bar-fill" style="width:91%"></div></div><span class="val">32,000円</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>査定お申し込み後、45日以内に売却成立まで完了すること</dd></dl>
+        <div class="note">事故車・修復歴車が対象です。査定だけでは対象になりません。他社で成約した場合も対象外です。承認まで約45日かかります。買取価格に上乗せされるボーナスとして考えてください。</div>
+        <p class="official">公式ページ：<a href="https://www.tau-reuse.com/" target="_blank" rel="noopener">tau-reuse.com</a>（事故車買取のタウ公式サイト）</p>
+        <p class="howto"><strong>ポイントをもらうには：</strong>モッピーに登録後、サイト内で「事故車買取のタウ」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 4 -->
+<article class="deal" data-cat="telecom" data-ease="monthly" data-deadline="2026-11-30" data-order="3">
+        <div class="deal-head">
+          <div class="rank top">4</div>
+          <div class="deal-title"><h3>楽天モバイル マジ得フェスティバル ＋ 楽天カード</h3><div class="deal-meta"><span class="tag">通信・回線</span><span class="tag">キャンペーン</span><span class="tag deadline">カード申込 11/30 10:00まで</span><span class="tag cost">要：月額費用</span><span class="tag deadline-badge">⏰ あと7日 ・ 11/30まで（カード申込）</span></div></div>
+          <div class="amount"><b>30,000pt</b><span>合わせ技の合計</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">内訳</div>
+          <div class="bar-row best"><span class="site">楽天モバイル申込</span><div class="bar-track"><div class="bar-fill" style="width:67%"></div></div><span class="val">20,000pt</span></div>
+          <div class="bar-row"><span class="site">楽天カード新規＋利用</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="val">10,000pt</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>楽天カード会員が初めて楽天モバイルを専用ページからお申し込みし、2026年12月31日までに開通、Rakuten Linkで10秒以上の発信通話を行うこと。クーポンコードの適用が必要です。楽天モバイルのお申し込み期限は2026年12月21日 10:00（Web）です。</dd></dl>
+        <div class="note">ポイントは2027年2月から5か月分割（毎月4,000pt・期間限定ポイント）で進呈されます。月額料金（最強プランは月1,078円〜）がかかるため、回線を使う方に向いています。データタイプのプランは対象外です。</div>
+        <p class="official">公式キャンペーンページ：<a href="https://network.mobile.rakuten.co.jp/campaign/card-mobile-majitoku/" target="_blank" rel="noopener">network.mobile.rakuten.co.jp/campaign/card-mobile-majitoku/</a></p>
+      </article>
+
+      <!-- 5 -->
+<article class="deal" id="deal-idemitsu" data-cat="card" data-ease="" data-deadline="2026-11-23" data-order="4">
+        <div class="deal-head">
+          <div class="rank top">4</div>
+          <div class="deal-title"><h3>出光カード apollostation THE PLATINUM</h3><div class="deal-meta"><span class="tag">カード</span><span class="tag topic-up">一斉増額</span><span class="tag fee">年会費 22,000円（税込）</span><span class="tag deadline">11/23まで（21〜23日限定）</span><span class="tag deadline-badge">⏰ 今日まで ・ 11/23まで</span></div></div>
+          <div class="amount"><b>30,000円分</b><span>ハピタス経由</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">ハピタス</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">30,000円分</span></div>
+          <div class="bar-row best"><span class="site">ワラウ</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">30,000円分</span></div>
+          <div class="bar-row"><span class="site">げん玉</span><div class="bar-track"><div class="bar-fill" style="width:93%"></div></div><span class="val">28,000円分</span></div>
+          <div class="bar-row"><span class="site">ポイントインカム</span><div class="bar-track"><div class="bar-fill" style="width:93%"></div></div><span class="val">28,000円分</span></div>
+          <div class="bar-row"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:90%"></div></div><span class="val">27,000円分</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>新規カード発行＋カード利用完了</dd></dl>
+        <div class="note">年会費22,000円（税込）がかかるため、実質 約8,000円分が見込みです。金額は変動しやすいため、申込前に広告ページで金額を確認してください。</div>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからハピタスに登録後、サイト内で「出光カード apollostation THE PLATINUM」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 6 -->
+<article class="deal" id="deal-ocn" data-cat="telecom" data-ease="monthly" data-deadline="2026-11-30" data-order="5">
+        <div class="deal-head">
+          <div class="rank">6</div>
+          <div class="deal-title"><h3>OCNインターネット × ドコモ光（10ギガ）</h3><div class="deal-meta"><span class="tag">通信・回線</span><span class="tag topic-up">一斉増額</span><span class="tag deadline">11/30まで</span><span class="tag cost">要：月額費用</span><span class="tag deadline-badge">⏰ あと7日 ・ 11/30まで</span></div></div>
+          <div class="amount"><b>28,400円分</b><span>モッピー経由</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">28,400円分</span></div>
+          <div class="bar-row"><span class="site">ハピタス</span><div class="bar-track"><div class="bar-fill" style="width:99%"></div></div><span class="val">28,300円分</span></div>
+          <div class="bar-row"><span class="site">ポイントインカム</span><div class="bar-track"><div class="bar-fill" style="width:99%"></div></div><span class="val">28,200円分</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>新規・事業者変更・転用での開通完了。10ギガ・1ギガとも同額です（月額を抑えたい方は1ギガもご検討ください）。</dd></dl>
+        <div class="note">光回線の月額料金がかかります。ポイント付与まで7〜8か月程度かかる場合があります。</div>
+        <p class="official">公式ページ：<a href="https://www.docomo.ne.jp/internet/hikari/index.html" target="_blank" rel="noopener">docomo.ne.jp/internet/hikari/</a>（ドコモ光の料金・エリアの確認はこちら）</p>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからモッピーに登録後、サイト内で「OCNインターネット ドコモ光」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 7 -->
+      <article class="deal" id="deal-dcard" data-cat="card" data-ease="cardonly" data-deadline="2026-11-30" data-order="6">
+        <div class="deal-head">
+          <div class="rank">7</div>
+          <div class="deal-title"><h3>dカード GOLD</h3><div class="deal-meta"><span class="tag">カード</span><span class="tag topic-up">過去最高</span><span class="tag topic-up">一斉増額</span><span class="tag fee">年会費 11,000円（税込）</span><span class="tag deadline">11/30まで</span><span class="tag ease">カード発行だけ</span><span class="tag deadline-badge">⏰ あと7日 ・ 11/30まで</span></div></div>
+          <div class="amount"><b>27,000円分</b><span>5サイト同額</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">27,000円分</span></div>
+          <div class="bar-row best"><span class="site">ハピタス</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">27,000円分</span></div>
+          <div class="bar-row best"><span class="site">ちょびリッチ</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">27,000円分</span></div>
+          <div class="bar-row best"><span class="site">ポイントタウン</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">27,000円分</span></div>
+          <div class="bar-row best"><span class="site">ECナビ</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">27,000円分</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>新規カード発行完了＋申込後45日以内に入会（VISA／Mastercardが対象）。承認までは発行後30日前後です。ハピタスでは「11/30まで超還元延長中」です（モッピーに締切表示はありません）。</dd></dl>
+        <div class="note">22,000円分から27,000円分へ増額し、過去最高額です（ポイントタウンは17,100pt→27,000ptで約1.6倍）。公式入会特典 最大7,400pt（新規入会2,000＋利用特典3,000＋固定費支払い最大2,400）と合わせると最大34,400円相当の見込みで、年会費11,000円（税込・初年度から）を引くと最大23,400円相当の見込みです。金額は変動しやすいため、申込前に広告ページで金額を確認してください。公式特典はエントリー＋利用条件あり。新規申込限定。2026年12月以降、還元率・年会費の見直し予定あり。</div>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからモッピーまたはハピタスに登録後、サイト内で「dカード GOLD」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 8 -->
+<article class="deal" data-cat="account" data-ease="notrade" data-deadline="2026-11-23" data-order="7">
+        <div class="deal-head">
+          <div class="rank">8</div>
+          <div class="deal-title"><h3>楽天証券（ハピ爆）</h3><div class="deal-meta"><span class="tag">証券口座</span><span class="tag topic-sns">SNSで話題</span><span class="tag deadline">11/23 23:59まで</span><span class="tag ease">取引不要</span><span class="tag deadline-badge">⏰ 今日まで ・ 11/23 23:59まで</span></div></div>
+          <div class="amount"><b>最大25,000円分</b><span>ハピタス経由・最大</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">ハピタス</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">最大25,000pt</span></div>
+          <div class="bar-row"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div><span class="val">10,000円</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>初めての総合口座開設＋開設から30日以内に5万円以上のご入金。ご入金した5万円はご自身のお金として口座に残ります。</dd></dl>
+        <div class="note">ハピ爆ボーナス分を含む最大額です。期限までに「判定中」の状態になっている必要があります。</div>
+        <p class="official">公式ページ：<a href="https://www.rakuten-sec.co.jp/smartphone/account-flow/" target="_blank" rel="noopener">rakuten-sec.co.jp</a>（楽天証券・口座開設の流れ）</p>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからハピタスに登録後、サイト内で「楽天証券」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 9 -->
+<article class="deal" data-cat="card" data-ease="cardonly" data-deadline="" data-order="8">
+        <div class="deal-head">
+          <div class="rank">9</div>
+          <div class="deal-title"><h3>au PAY ゴールドカード</h3><div class="deal-meta"><span class="tag">カード</span><span class="tag fee">年会費 11,000円</span><span class="tag ease">カード発行だけ</span><span class="tag nodeadline">締切なし・未定</span></div></div>
+          <div class="amount"><b>20,000円分</b><span>モッピー経由</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">20,000円</span></div>
+          <div class="bar-row"><span class="site">ちょびリッチ</span><div class="bar-track"><div class="bar-fill" style="width:70%"></div></div><span class="val">14,000円</span></div>
+          <div class="bar-row"><span class="site">ハピタス</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="val">10,000円</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>新規カード発行</dd></dl>
+        <div class="note">年会費11,000円がかかるため、実質の見込みは約9,000円です。</div>
+        <p class="official">公式ページ：<a href="https://www.kddi-fs.com/merit/goldbenefits/" target="_blank" rel="noopener">kddi-fs.com/merit/goldbenefits/</a>（au PAY ゴールドカードの特典はこちら）</p>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからモッピーに登録後、サイト内で「au PAY ゴールドカード」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 10 -->
+<article class="deal" data-cat="telecom" data-ease="monthly" data-deadline="2026-12-06" data-order="9">
+        <div class="deal-head">
+          <div class="rank">9</div>
+          <div class="deal-title"><h3>LINEMO 5周年大週穫祭 第4弾</h3><div class="deal-meta"><span class="tag">格安SIM</span><span class="tag">キャンペーン</span><span class="tag deadline">11/23〜12/6</span><span class="tag cost">要：月額費用</span><span class="tag deadline-badge">⏰ あと13日 ・ 12/6まで</span></div></div>
+          <div class="amount"><b>20,000円相当</b><span>乗り換え・ベストプランV</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">プラン別の還元</div>
+          <div class="bar-row best"><span class="site">乗り換え／ベストプランV</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">20,000円相当</span></div>
+          <div class="bar-row"><span class="site">乗り換え／ベストプラン</span><div class="bar-track"><div class="bar-fill" style="width:70%"></div></div><span class="val">14,000円相当</span></div>
+          <div class="bar-row"><span class="site">新規番号／ベストプランV</span><div class="bar-track"><div class="bar-fill" style="width:70%"></div></div><span class="val">14,000円相当</span></div>
+          <div class="bar-row"><span class="site">新規番号／ベストプラン</span><div class="bar-track"><div class="bar-fill" style="width:35%"></div></div><span class="val">7,000円相当</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>期間中のお申し込みでPayPayポイントが進呈されます。契約事務手数料3,850円は0円です。</dd></dl>
+        <div class="note">ソフトバンク・ワイモバイル・LINEモバイルからの乗り換えは対象外です。11/22までのお申し込み分は還元額が異なるため、第4弾の開始（11/23）以降がお得です。</div>
+        <p class="official">公式キャンペーンページ：<a href="https://www.linemo.jp/campaign/syukakusai/202611/1123/" target="_blank" rel="noopener">linemo.jp/campaign/syukakusai/202611/1123/</a></p>
+      </article>
+
+      <!-- 11 -->
+<article class="deal" id="deal-rakuten-bank" data-cat="account" data-ease="open notrade" data-deadline="2026-11-23" data-order="10">
+        <div class="deal-head">
+          <div class="rank">9</div>
+          <div class="deal-title"><h3>楽天銀行 口座開設</h3><div class="deal-meta"><span class="tag">銀行口座</span><span class="tag topic-up">過去最高</span><span class="tag deadline">11/23まで（三連休限定）</span><span class="tag ease">口座開設だけ</span><span class="tag ease">取引不要</span><span class="tag deadline-badge">⏰ 今日まで ・ 11/23まで</span></div></div>
+          <div class="amount"><b>20,000円分</b><span>モッピー／ハピタス同額</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">20,000円分</span></div>
+          <div class="bar-row best"><span class="site">ハピタス</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">20,000円分</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>新規口座開設＋初回ログイン完了。お申し込みから30日以内に口座開設が必要です。</dd></dl>
+        <div class="note">入金・取引は不要で、純粋に20,000円分の見込みです。現在の還元額は過去最高水準です。</div>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからモッピーまたはハピタスに登録後、サイト内で「楽天銀行」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 12 -->
+      <article class="deal" id="deal-sbi" data-cat="account" data-ease="notrade" data-deadline="" data-order="11">
+        <div class="deal-head">
+          <div class="rank">12</div>
+          <div class="deal-title"><h3>SBI証券 新規口座開設・入金</h3><div class="deal-meta"><span class="tag">証券口座</span><span class="tag ease">取引不要</span><span class="tag nodeadline">締切なし・未定</span></div></div>
+          <div class="amount"><b>19,000円分</b><span>ハピタス経由</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">ハピタス</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">19,000円分</span></div>
+          <div class="bar-row"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:84%"></div></div><span class="val">16,000円分</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>新規口座開設＋50,000円以上の入金。お取引は不要です。口座開設料・管理料は無料です。</dd></dl>
+        <div class="note">過去にSBI証券の口座を使ったことがある方は対象外です。法人・未成年・仲介口座も対象外です。入金方法（ハイブリッド預金への振替）は広告ページで確認してください。ポイント付与まで口座を閉じないでください。SBI証券 こども口座開設（13,000円）とは別案件です。金額は変動しやすいため、申込前に広告ページで金額を確認してください。</div>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからハピタスに登録後、サイト内で「SBI証券」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 13 -->
+      <article class="deal" id="deal-mizuho-deposit" data-cat="account" data-ease="notrade" data-deadline="" data-order="12">
+        <div class="deal-head">
+          <div class="rank">13</div>
+          <div class="deal-title"><h3>みずほ銀行 口座開設（10万円以上入金）</h3><div class="deal-meta"><span class="tag">銀行口座</span><span class="tag ease">取引不要</span><span class="tag nodeadline">締切なし・未定</span></div></div>
+          <div class="amount"><b>15,000円分</b><span>モッピー経由</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">15,000円分</span></div>
+          <div class="bar-row"><span class="site">ハピタス</span><div class="bar-track"><div class="bar-fill" style="width:97%"></div></div><span class="val">14,500円分</span></div>
+          <div class="bar-row"><span class="site">ECナビ</span><div class="bar-track"><div class="bar-fill" style="width:97%"></div></div><span class="val">14,500円分</span></div>
+          <div class="bar-row"><span class="site">アメフリ</span><div class="bar-track"><div class="bar-fill" style="width:97%"></div></div><span class="val">14,500円分</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>WEBで新規口座開設＋10万円の入金。毎月10日までに開設を完了し、当月25日までに10万円を入金、当月25日24時時点で残高10万円以上が必要です。みずほダイレクトの登録が必須です。ポイント付与時点で口座を解約している場合は対象外です。</dd></dl>
+        <div class="note">「取引不要」の案件ですが、入金と残高の維持が必要です。入金不要の通常版（ハピタス13,000円分）とは別案件です。お申し込みのタイミングによっては翌月サイクルの扱いになる場合があるため、申込前に広告ページで確認してください。金額は変動しやすいため、申込前に広告ページで金額を確認してください。</div>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからモッピーに登録後、サイト内で「みずほ銀行 口座開設」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 14 -->
+      <article class="deal" id="deal-epos" data-cat="card" data-ease="free" data-deadline="2026-11-23" data-order="13">
+        <div class="deal-head">
+          <div class="rank">13</div>
+          <div class="deal-title"><h3>エポスカード</h3><div class="deal-meta"><span class="tag">カード</span><span class="tag">年会費永年無料</span><span class="tag ease">無料でできる</span><span class="tag deadline">11/23まで</span><span class="tag deadline-badge">⏰ 今日まで ・ 11/23まで</span></div></div>
+          <div class="amount"><b>15,000円分</b><span>ハピタス経由</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">ハピタス</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">15,000円分</span></div>
+          <div class="bar-row"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:80%"></div></div><span class="val">12,000円分</span></div>
+          <div class="bar-row"><span class="site">ポイントインカム</span><div class="bar-track"><div class="bar-fill" style="width:80%"></div></div><span class="val">12,000円分</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>新規カード発行完了のみ。年会費は永年無料で、ご利用条件はありません。</dd></dl>
+        <div class="note">過去にエポスカード（デザインカードを含みます）を作ったことがある方は対象外です。受取後の即時解約は対象外となります。紹介制度との併用はできません。カードの受取確認が必要です。金額は変動しやすいため、申込前に広告ページで金額を確認してください。</div>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからハピタスに登録後、サイト内で「エポスカード」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 15 -->
+<article class="deal" id="deal-jcbw" data-cat="card" data-ease="free" data-deadline="2026-11-30" data-order="14">
+        <div class="deal-head">
+          <div class="rank">15</div>
+          <div class="deal-title"><h3>JCB CARD W</h3><div class="deal-meta"><span class="tag">カード</span><span class="tag">年会費永年無料</span><span class="tag deadline">11/30まで</span><span class="tag ease">無料でできる</span><span class="tag deadline-badge">⏰ あと7日 ・ 11/30まで</span></div></div>
+          <div class="amount"><b>14,000円分</b><span>5サイト同額</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">14,000円分</span></div>
+          <div class="bar-row best"><span class="site">ハピタス</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">14,000円分</span></div>
+          <div class="bar-row best"><span class="site">ポイントインカム</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">14,000円分</span></div>
+          <div class="bar-row best"><span class="site">ちょびリッチ</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">14,000円分</span></div>
+          <div class="bar-row best"><span class="site">ECナビ</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">14,000円分</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>新規発行のみ</dd></dl>
+        <div class="note">年会費は永年無料です。過去にJCBオリジナルシリーズを持っていた方は対象外です。公式の入会キャンペーン（最大27,000円相当）と併用できます（スマホ決済20%還元は、入会月の翌々月15日までに6万円利用で上限12,000円）。2026年11月2日以降の入会は、MyJCBへのログインとキャンペーン参加登録が必要です。</div>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからモッピーまたはハピタスに登録後、サイト内で「JCB CARD W」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 16 -->
+<article class="deal" id="deal-mizuho-child" data-cat="account" data-ease="open notrade free limited" data-deadline="2026-11-23" data-order="15">
+        <div class="deal-head">
+          <div class="rank">16</div>
+          <div class="deal-title"><h3>みずほ銀行 子ども口座開設</h3><div class="deal-meta"><span class="tag">銀行口座</span><span class="tag topic-up">一斉増額</span><span class="tag deadline">11/23まで（三連休限定）</span><span class="tag ease">口座開設だけ</span><span class="tag ease">無料でできる</span><span class="tag limit">対象が限られます</span><span class="tag deadline-badge">⏰ 今日まで ・ 11/23まで</span></div></div>
+          <div class="amount"><b>13,000円</b><span>ハピタス経由</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">げん玉（比較のみ）</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">14,000円</span></div>
+          <div class="bar-row"><span class="site">ハピタス</span><div class="bar-track"><div class="bar-fill" style="width:93%"></div></div><span class="val">13,000円</span></div>
+          <div class="bar-row"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:89%"></div></div><span class="val">12,500円</span></div>
+          <div class="bar-row"><span class="site">ポイントインカム</span><div class="bar-track"><div class="bar-fill" style="width:89%"></div></div><span class="val">12,500円</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>親権者によるお子様用口座新規開設完了＋開設日から20日以内にみずほダイレクト初回登録完了。対象は15歳未満のお子さま。入金・取引不要</dd></dl>
+        <div class="note">合わせ技：親のみずほ銀行口座13,000円＋子ども口座13,000円＋SBIこども口座13,000円＝親子3口座で39,000円分が見込みです。承認まで最大60日かかる場合があります。げん玉は比較のみの掲載で、このページからの登録案内はありません。</div>
+        <p class="official">公式ページ：<a href="https://www.mizuhobank.co.jp/account/child/index.html" target="_blank" rel="noopener">mizuhobank.co.jp/account/child/</a>（お子さまの口座開設はこちら）</p>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからハピタスに登録後、サイト内で「みずほ銀行 子ども口座」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 17 -->
+<article class="deal" data-cat="account" data-ease="open notrade limited" data-deadline="2026-11-23" data-order="16">
+        <div class="deal-head">
+          <div class="rank">16</div>
+          <div class="deal-title"><h3>SBI証券 こども口座開設</h3><div class="deal-meta"><span class="tag">証券口座</span><span class="tag topic-sns">SNSで話題</span><span class="tag deadline">11/23まで（三連休限定）</span><span class="tag ease">口座開設だけ</span><span class="tag ease">取引不要</span><span class="tag limit">対象が限られます</span><span class="tag deadline-badge">⏰ 今日まで ・ 11/23まで</span></div></div>
+          <div class="amount"><b>13,000円</b><span>モッピー／ハピタス同額</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">13,000円</span></div>
+          <div class="bar-row best"><span class="site">ハピタス</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">13,000円</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>こども口座の開設完了のみ（お申し込みから60日以内）。ご入金やお取引は不要です。</dd></dl>
+        <div class="note">対象は0〜17歳未満のお子さまです。過去に開設したお子さまは対象外で、お子さま1人につきお申し込みは1回までです。判定の目安は約1か月です。みずほ銀行の子ども口座（13,000円）と合わせると26,000円相当になります。</div>
+        <p class="official">公式ページ：<a href="https://search.sbisec.co.jp/v2/popwin/help/account_06_01.html" target="_blank" rel="noopener">sbisec.co.jp</a>（SBI証券・こども口座のご案内）</p>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからモッピーまたはハピタスに登録後、サイト内で「SBI証券 こども口座」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 18 -->
+<article class="deal" id="deal-mizuho-personal" data-cat="account" data-ease="open" data-deadline="" data-order="17">
+        <div class="deal-head">
+          <div class="rank">16</div>
+          <div class="deal-title"><h3>みずほ銀行 口座開設（個人）</h3><div class="deal-meta"><span class="tag">銀行口座</span><span class="tag fee">期限は要確認</span><span class="tag ease">口座開設だけ</span></div></div>
+          <div class="amount"><b>13,000円分</b><span>ハピタス経由</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">ポイントインカム</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">15,100円分</span></div>
+          <div class="bar-row"><span class="site">ちょびリッチ</span><div class="bar-track"><div class="bar-fill" style="width:89%"></div></div><span class="val">13,500円分</span></div>
+          <div class="bar-row"><span class="site">ハピタス</span><div class="bar-track"><div class="bar-fill" style="width:86%"></div></div><span class="val">13,000円分</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>新規口座開設完了＋開設日から20日以内にみずほダイレクトの初回登録</dd></dl>
+        <div class="note">入金は不要です。みずほ公式の秋トクキャンペーンの口座開設申込は11/12で終了しているため、併用はできません。SBI証券のこども口座開設（13,000円）と合わせると、合計26,000円見込みの合わせ技もあります。締切は各サイトでご確認ください（期限は要確認）。</div>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからハピタスに登録後、サイト内で「みずほ銀行 口座開設」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 19 -->
+<article class="deal" id="deal-idex" data-cat="other" data-ease="limited" data-deadline="" data-order="18">
+        <div class="deal-head">
+          <div class="rank">19</div>
+          <div class="deal-title"><h3>イデックスでんき</h3><div class="deal-meta"><span class="tag">電力</span><span class="tag limit">九州エリア限定</span><span class="tag nodeadline">締切なし・未定</span></div></div>
+          <div class="amount"><b>11,300円分</b><span>ハピタス経由</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">ちょびリッチ</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">15,000円分</span></div>
+          <div class="bar-row"><span class="site">アメフリ</span><div class="bar-track"><div class="bar-fill" style="width:93%"></div></div><span class="val">14,000円分</span></div>
+          <div class="bar-row"><span class="site">ハピタス</span><div class="bar-track"><div class="bar-fill" style="width:75%"></div></div><span class="val">11,300円分</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>新規契約完了（最低契約期間1か月）</dd></dl>
+        <div class="note">九州エリア限定です（福岡・佐賀・長崎・大分・熊本・宮崎・鹿児島）。解約手数料0円・縛りなし。マーケットプランは市場価格連動のため単価が変動します。電気代は毎月かかりますが、切り替えのため新たなコストではありません。</div>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからハピタスに登録後、サイト内で「イデックスでんき」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 20 -->
+<article class="deal" id="deal-jcb-s" data-cat="card" data-ease="cardonly free" data-deadline="2026-11-30" data-order="19">
+        <div class="deal-head">
+          <div class="rank">20</div>
+          <div class="deal-title"><h3>JCBカード S</h3><div class="deal-meta"><span class="tag">カード</span><span class="tag">年会費永年無料</span><span class="tag deadline">11/30まで</span><span class="tag ease">カード発行だけ</span><span class="tag ease">無料でできる</span><span class="tag deadline-badge">⏰ あと7日 ・ 11/30まで</span></div></div>
+          <div class="amount"><b>10,000円分</b><span>3サイト同額</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">ハピタス</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">10,000円分</span></div>
+          <div class="bar-row best"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">10,000円分</span></div>
+          <div class="bar-row best"><span class="site">ポイントタウン</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">10,000円分</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>新規カード発行完了（カードのお受け取りが必要です）</dd></dl>
+        <div class="note">年会費は永年無料です。公式の入会特典（最大23,000円分）と合わせると、最大33,000円分の見込みです。同じJCBオリジナルシリーズのJCB CARD W（14,000円分）とは両取りはできず、どちらか1枚の選択になります。</div>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからハピタスに登録後、サイト内で「JCBカード S」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 21 -->
+<article class="deal" data-cat="card" data-ease="free" data-deadline="2026-11-23" data-order="20">
+        <div class="deal-head">
+          <div class="rank">21</div>
+          <div class="deal-title"><h3>P-oneカード＜Standard＞</h3><div class="deal-meta"><span class="tag">カード</span><span class="tag topic-up">一斉増額</span><span class="tag">年会費無料</span><span class="tag deadline">締切はサイトで表記が異なります（11/23／11/30）</span><span class="tag ease">無料でできる</span></div></div>
+          <div class="amount"><b>8,000円分</b><span>3サイト同額</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">ハピタス</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">8,000円分</span></div>
+          <div class="bar-row best"><span class="site">ポイントインカム</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">8,000円分</span></div>
+          <div class="bar-row best"><span class="site">ちょびリッチ</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">8,000円分</span></div>
+          <div class="bar-row"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:88%"></div></div><span class="val">7,000円分</span></div>
+          <div class="bar-row"><span class="site">げん玉</span><div class="bar-track"><div class="bar-fill" style="width:83%"></div></div><span class="val">6,600円分</span></div>
+          <div class="bar-row"><span class="site">ポイントタウン</span><div class="bar-track"><div class="bar-fill" style="width:69%"></div></div><span class="val">5,500円分</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>新規カード発行＋翌月末までに1円以上のご利用（カードのお受け取りが必要です）。年会費は無料です。</dd></dl>
+        <div class="note">締切の表記はサイトにより異なります（モッピー・ポイントインカムは11/23、げん玉は11/30と表記）。お申し込み前に各サイトでご確認ください。過去にお申し込み・保有したことがある方は対象外です（解約後の再お申し込みを含みます）。ポイント付与前の解約やキャッシングのご利用も対象外となります。</div>
+        <p class="official">公式ページ：<a href="https://www.pocketcard.co.jp/card/card_pone_s.html" target="_blank" rel="noopener">pocketcard.co.jp</a>（P-oneカード＜Standard＞の詳細はこちら）</p>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからハピタスに登録後、サイト内で「P-oneカード」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 22 -->
+<article class="deal" data-cat="other" data-ease="monthly" data-deadline="" data-order="21">
+        <div class="deal-head">
+          <div class="rank">21</div>
+          <div class="deal-title"><h3>メルスプラン WEB入会（メニコン）</h3><div class="deal-meta"><span class="tag">コンタクト</span><span class="tag topic-up">一斉増額</span><span class="tag">定額プラン</span><span class="tag cost">要：月額費用</span><span class="tag nodeadline">締切なし・未定</span></div></div>
+          <div class="amount"><b>8,000円</b><span>モッピー経由</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">8,000円</span></div>
+          <div class="bar-row"><span class="site">ポイントインカム</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">8,000円</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>1日使い捨てコンタクトレンズタイプで新規入会のお申し込み完了＋入会後2か月以内に加盟施設への来店・眼科受診。別途、最大4,000円分のMENICOiNがもらえる場合があります。</dd></dl>
+        <div class="note">コンタクトの定額プランのため月額料金がかかります。普段からコンタクトをお使いの方に向いています。判定まで約2か月かかります。</div>
+        <p class="official">公式ページ：<a href="https://www.menicon.co.jp/company/news/vol1223.html" target="_blank" rel="noopener">menicon.co.jp</a>（メルスWEB入会のご案内・メニコン公式）</p>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからモッピーに登録後、サイト内で「メルスプラン」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 23 -->
+<article class="deal" id="deal-dmm-jcb" data-cat="card" data-ease="free" data-deadline="2026-11-23" data-order="22">
+        <div class="deal-head">
+          <div class="rank">23</div>
+          <div class="deal-title"><h3>DMM JCBカード</h3><div class="deal-meta"><span class="tag">カード</span><span class="tag topic-up">一斉増額</span><span class="tag">年会費無料</span><span class="tag deadline">11/23まで</span><span class="tag ease">無料でできる</span><span class="tag deadline-badge">⏰ 今日まで ・ 11/23まで</span></div></div>
+          <div class="amount"><b>7,200円分</b><span>ハピタス経由</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">ハピタス</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">7,200円分</span></div>
+          <div class="bar-row"><span class="site">ポイントインカム</span><div class="bar-track"><div class="bar-fill" style="width:90%"></div></div><span class="val">6,500円分</span></div>
+          <div class="bar-row"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:90%"></div></div><span class="val">6,500円分</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>新規カード発行＋発行月の翌月末までにDMMサイト内で1円以上のご利用</dd></dl>
+        <div class="note">本日3,500円分から7,200円分へ増額しました。年会費は無料です。7,200円相当にはDMMポイント1,000ptが含まれる場合があります。</div>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからハピタスに登録後、サイト内で「DMM JCBカード」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 24 -->
+<article class="deal" data-cat="telecom" data-ease="limited" data-deadline="2026-11-23" data-order="23">
+        <div class="deal-head">
+          <div class="rank">24</div>
+          <div class="deal-title"><h3>povo2.0</h3><div class="deal-meta"><span class="tag">格安SIM</span><span class="tag">eSIM</span><span class="tag deadline">11/23まで</span><span class="tag limit">対象が限られます</span><span class="tag deadline-badge">⏰ 今日まで ・ 11/23まで</span></div></div>
+          <div class="amount"><b>6,500円分</b><span>ハピタス経由</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">ハピタス</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">6,500円</span></div>
+          <div class="bar-row"><span class="site">ポイントインカム</span><div class="bar-track"><div class="bar-fill" style="width:88%"></div></div><span class="val">5,700円</span></div>
+          <div class="bar-row"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:86%"></div></div><span class="val">5,600円</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>「通話＋データ」のeSIMを新規開通し、開通日を含む3日以内にトッピングをご購入ください。プロモコードの入力が必要です（ハピタス経由は HAPITAS1GB）。</dd></dl>
+        <div class="note">過去にpovo2.0をお申し込みした方は対象外です。対象はeSIMのみです。</div>
+        <p class="official">公式ページ：<a href="https://povo.jp/" target="_blank" rel="noopener">povo.jp</a>（povo2.0公式サイト）</p>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからハピタスに登録後、サイト内で「povo2.0」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 25 -->
+<article class="deal" data-cat="account" data-ease="open notrade free" data-deadline="2026-11-30" data-order="24">
+        <div class="deal-head">
+          <div class="rank">24</div>
+          <div class="deal-title"><h3>SBI FXトレード（口座開設のみ）</h3><div class="deal-meta"><span class="tag">FX口座</span><span class="tag topic-up">一斉増額</span><span class="tag deadline">11/30まで</span><span class="tag ease">口座開設だけ</span><span class="tag ease">取引不要</span><span class="tag ease">無料でできる</span><span class="tag deadline-badge">⏰ あと7日 ・ 11/30まで</span></div></div>
+          <div class="amount"><b>6,500円</b><span>モッピー経由</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">6,500円</span></div>
+          <div class="bar-row"><span class="site">ハピタス</span><div class="bar-track"><div class="bar-fill" style="width:92%"></div></div><span class="val">6,000円</span></div>
+          <div class="bar-row"><span class="site">ポイントインカム</span><div class="bar-track"><div class="bar-fill" style="width:85%"></div></div><span class="val">5,500円</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>新規口座開設のみ（お取引は不要です）</dd></dl>
+        <div class="note">お取引が条件の別案件（最大26,000円）とお間違えのないようご注意ください。口座開設には本人確認とマイナンバーが必要です。</div>
+        <p class="official">公式ページ：<a href="https://www.sbifxt.co.jp/beginner/step01_2.html" target="_blank" rel="noopener">sbifxt.co.jp</a>（SBI FXトレード・口座開設の流れ）</p>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからモッピーに登録後、サイト内で「SBI FXトレード」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 26 -->
+<article class="deal" data-cat="card" data-ease="cardonly free" data-deadline="2026-11-30" data-order="25">
+        <div class="deal-head">
+          <div class="rank">26</div>
+          <div class="deal-title"><h3>イオンカードセレクト（ミニオンズ）</h3><div class="deal-meta"><span class="tag">カード</span><span class="tag">年会費無料</span><span class="tag deadline">11/30まで</span><span class="tag ease">カード発行だけ</span><span class="tag ease">無料でできる</span><span class="tag deadline-badge">⏰ あと7日 ・ 11/30まで</span></div></div>
+          <div class="amount"><b>5,500円分</b><span>ハピタス経由</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">ハピタス</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">5,500円</span></div>
+          <div class="bar-row"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:91%"></div></div><span class="val">5,000円</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>新規カード発行。年会費は無料のため、還元額がそのまま見込み額です。</dd></dl>
+        <p class="official">公式ページ：<a href="http://www.aeon.co.jp/creditcard/lineup/minions_select.html" target="_blank" rel="noopener">aeon.co.jp</a>（イオンカードセレクト（ミニオンズ）の詳細はこちら）</p>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからハピタスに登録後、サイト内で「イオンカードセレクト ミニオンズ」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 27 -->
+<article class="deal" data-cat="account" data-ease="" data-deadline="" data-order="26">
+        <div class="deal-head">
+          <div class="rank">27</div>
+          <div class="deal-title"><h3>CoinTrade（コイントレード）</h3><div class="deal-meta"><span class="tag">暗号資産</span><span class="tag topic-up">一斉増額</span><span class="tag cost">要：1万円分の購入</span><span class="tag nodeadline">締切なし・未定</span></div></div>
+          <div class="amount"><b>5,000円</b><span>モッピー経由</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">5,000円</span></div>
+          <div class="bar-row best"><span class="site">ポイントインカム</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">5,000円</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>新規口座開設後、7日以内に1万円分のご購入</dd></dl>
+        <div class="note">ご購入分の暗号資産には価格変動のリスクがあります。7日以内という期限がポイントです。</div>
+        <p class="official">公式ページ：<a href="https://coin-trade.cc/" target="_blank" rel="noopener">coin-trade.cc</a>（CoinTrade公式サイト）</p>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからモッピーに登録後、サイト内で「CoinTrade」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 28 -->
+<article class="deal" data-cat="other" data-ease="monthly" data-deadline="" data-order="27">
+        <div class="deal-head">
+          <div class="rank">28</div>
+          <div class="deal-title"><h3>Hulu 月額有料登録</h3><div class="deal-meta"><span class="tag">動画配信</span><span class="tag cost">要：月額費用</span><span class="tag nodeadline">締切なし・未定</span></div></div>
+          <div class="amount"><b>2,700円分</b><span>ハピタス経由</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">ハピタス</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">2,700円</span></div>
+          <div class="bar-row"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:89%"></div></div><span class="val">2,400円</span></div>
+          <div class="bar-row"><span class="site">げん玉</span><div class="bar-track"><div class="bar-fill" style="width:89%"></div></div><span class="val">2,400円</span></div>
+          <div class="bar-row"><span class="site">ポイントインカム</span><div class="bar-track"><div class="bar-fill" style="width:74%"></div></div><span class="val">2,000円</span></div>
+          <div class="bar-row"><span class="site">ポイントタウン</span><div class="bar-track"><div class="bar-fill" style="width:74%"></div></div><span class="val">2,000円</span></div>
+          <div class="bar-row"><span class="site">ちょびリッチ</span><div class="bar-track"><div class="bar-fill" style="width:74%"></div></div><span class="val">2,000円</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>初めての見放題会員（月額有料）登録完了。月額1,320円（税込）のため、1か月だけのご利用なら差し引き約1,380円の見込みです。判定まで約30日かかります。</dd></dl>
+        <div class="note">過去にHuluをご利用した方、無料トライアルからの登録、アプリ内決済での登録は対象外です。ご登録はWebからがおすすめです。</div>
+        <p class="official">公式ページ：<a href="https://www.hulu.jp/" target="_blank" rel="noopener">hulu.jp</a>（Hulu公式サイト）</p>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからハピタスに登録後、サイト内で「Hulu」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 29 -->
+<article class="deal" data-cat="other" data-ease="monthly" data-deadline="" data-order="28">
+        <div class="deal-head">
+          <div class="rank">29</div>
+          <div class="deal-title"><h3>Get!!プリキャラ dバリューパス</h3><div class="deal-meta"><span class="tag">dバリューパス</span><span class="tag cost">要：月額費用</span><span class="tag nodeadline">締切なし・未定</span></div></div>
+          <div class="amount"><b>1,600円分</b><span>モッピー／ポイントインカム同額</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">1,600円</span></div>
+          <div class="bar-row best"><span class="site">ポイントインカム</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">1,600円</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>新規契約＋32日以上のご契約継続。初回31日間は無料、32日目から月額550円がかかるため、実質は約1,050円の見込みです。承認まで約45日、dアカウントが必要です。</dd></dl>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからモッピーに登録後、サイト内で「Get!!プリキャラ dバリューパス」を検索して申し込んでください。</p>
+      </article>
+
+      <!-- 30 -->
+<article class="deal" data-cat="other" data-ease="" data-deadline="" data-order="29">
+        <div class="deal-head">
+          <div class="rank">30</div>
+          <div class="deal-title"><h3>honto 電子書籍</h3><div class="deal-meta"><span class="tag">電子書籍</span><span class="tag nodeadline">締切なし・未定</span></div></div>
+          <div class="amount"><b>1,000円</b><span>各サイト同額</span></div>
+        </div>
+        <div class="compare"><div class="compare-title">サイト別比較</div>
+          <div class="bar-row best"><span class="site">モッピー</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">1,000円</span></div>
+          <div class="bar-row best"><span class="site">ハピタス</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">1,000円</span></div>
+          <div class="bar-row best"><span class="site">ポイントインカム</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="val">1,000円</span></div>
+        </div>
+        <dl class="cond"><dt>条件</dt><dd>初めてのご購入が条件です。モッピー／ハピタス／ポイントインカムなどで同額です。</dd></dl>
+        <p class="official">公式ページ：<a href="https://honto.jp/" target="_blank" rel="noopener">honto.jp</a>（honto電子書籍ストア）</p>
+        <p class="howto"><strong>ポイントをもらうには：</strong>下の紹介リンクからモッピー等に登録後、サイト内で「honto」を検索して申し込んでください。</p>
+      </article>
+
+    </div>
+    <p id="emptyMsg" class="sec-sub hidden">条件に合う案件はありません。絞り込みを変えてお試しください。</p>
+  </section>
+
+  <section id="deadlines">
+    <h2>締切一覧</h2>
+    <p class="sec-sub">近い順です。三連休限定の増額が11/23に集中しています。</p>
+    <div class="dl">
+      <div class="dl-row"><span class="dl-date">11/23</span><div class="dl-body"><b>楽天銀行 口座開設</b><span>三連休限定 ・ モッピー／ハピタス</span></div><span class="dl-amt">20,000円分</span></div>
+      <div class="dl-row"><span class="dl-date">11/23</span><div class="dl-body"><b>DMM JCBカード</b><span>本日増額 ・ ハピタス</span></div><span class="dl-amt">7,200円分</span></div>
+      <div class="dl-row"><span class="dl-date">11/23</span><div class="dl-body"><b>SBI証券 こども口座開設</b><span>三連休限定 ・ モッピー／ハピタス</span></div><span class="dl-amt">13,000円</span></div>
+      <div class="dl-row"><span class="dl-date">11/23</span><div class="dl-body"><b>みずほ銀行 子ども口座開設</b><span>三連休限定 ・ ハピタス</span></div><span class="dl-amt">13,000円</span></div>
+      <div class="dl-row"><span class="dl-date">11/23</span><div class="dl-body"><b>出光カード apollostation THE PLATINUM</b><span>21〜23日限定 ・ ハピタス／ワラウ。年会費22,000円のため実質 約8,000円分</span></div><span class="dl-amt">30,000円分</span></div>
+      <div class="dl-row"><span class="dl-date">11/23</span><div class="dl-body"><b>povo2.0</b><span>ハピタス</span></div><span class="dl-amt">6,500円分</span></div>
+      <div class="dl-row"><span class="dl-date">11/23 23:59</span><div class="dl-body"><b>楽天証券（ハピ爆）</b><span>期限までに「判定中」になっている必要があります ・ ハピタス</span></div><span class="dl-amt">最大25,000pt</span></div>
+      <div class="dl-row"><span class="dl-date">11/30 10:00</span><div class="dl-body"><b>楽天カード 新規入会＆利用（楽天モバイル合わせ技分）</b><span>楽天モバイル本体のお申し込みは12/21 10:00まで</span></div><span class="dl-amt">10,000pt</span></div>
+      <div class="dl-row"><span class="dl-date">11/30</span><div class="dl-body"><b>JCB CARD W</b><span>モッピー／ハピタスなど5サイト同額</span></div><span class="dl-amt">14,000円分</span></div>
+      <div class="dl-row"><span class="dl-date">11/30</span><div class="dl-body"><b>JCBカード S</b><span>ハピタス／モッピー／ポイントタウン同額</span></div><span class="dl-amt">10,000円分</span></div>
+      <div class="dl-row"><span class="dl-date">11/30</span><div class="dl-body"><b>OCNインターネット × ドコモ光</b><span>モッピー</span></div><span class="dl-amt">28,400円分</span></div>
+      <div class="dl-row"><span class="dl-date">11/30</span><div class="dl-body"><b>SBI FXトレード（口座開設のみ）</b><span>モッピー</span></div><span class="dl-amt">6,500円</span></div>
+      <div class="dl-row"><span class="dl-date">11/30</span><div class="dl-body"><b>イオンカードセレクト（ミニオンズ）</b><span>ハピタス</span></div><span class="dl-amt">5,500円分</span></div>
+      <div class="dl-row"><span class="dl-date">11/30</span><div class="dl-body"><b>dカード GOLD</b><span>ハピタスは11/30まで超還元延長中 ・ 5サイト同額</span></div><span class="dl-amt">27,000円分</span></div>
+      <div class="dl-row"><span class="dl-date">12/6</span><div class="dl-body"><b>LINEMO 5周年大週穫祭 第4弾</b><span>11/23開始 ・ 乗り換え／ベストプランV</span></div><span class="dl-amt">20,000円相当</span></div>
+      <div class="dl-row"><span class="dl-date">12/21 10:00</span><div class="dl-body"><b>楽天モバイル マジ得フェスティバル</b><span>Webお申し込み期限 ・ 開通は12/31まで</span></div><span class="dl-amt">20,000pt</span></div>
+      <div class="dl-row"><span class="dl-date">2027/1/4</span><div class="dl-body"><b>ワイモバイル 機種変更オファー</b><span>対象者限定のオファーです</span></div></div>
+    </div>
+    <p class="sec-sub" style="margin-top:10px">期限の記載がない案件（SoftBank Air、タウ、au PAY ゴールドカード、メルスプラン、CoinTrade、Hulu、イデックスでんきなど）と、期限が要確認のみずほ銀行 口座開設（個人）は、還元額が変わりやすいためお早めのご確認をおすすめします。P-oneカード＜Standard＞はサイトにより締切の表記が異なります（11/23／11/30）。</p>
+  </section>
+
+  <section id="links">
+    <h2>紹介リンク</h2>
+    <p class="sec-sub">まだ登録していないサイトは、こちらから登録すると紹介特典の対象になる場合があります。各サイトの登録ページで特典内容をご確認ください。</p>
+    <div class="link-grid">
+      <div class="link-card">
+        <h3>モッピー</h3>
+        <p>このページで一番お得になる案件が多いサイトです。SoftBank Air 50,000円、OCN 28,400円などはこちら経由が最高額です。</p>
+        <a class="btn" href="https://pc.moppy.jp/entry/invite.php?invite=ZkTRA1cf" target="_blank" rel="noopener sponsored">モッピーに登録する →</a>
+      </div>
+      <div class="link-card">
+        <h3>ハピタス</h3>
+        <p>カード・証券・銀行口座の案件が強いサイトです。楽天証券最大25,000pt、みずほ銀行 子ども口座13,000円、出光カード apollostation THE PLATINUM 30,000円分などはこちら経由がお得です。</p>
+        <a class="btn" href="https://hapitas.jp/appinvite?i=24535369" target="_blank" rel="noopener sponsored">ハピタスに登録する →</a>
+      </div>
+      <div class="link-card">
+        <h3>powl（アプリ）</h3>
+        <p>アプリの招待コードです。powlを初めて使うときに入力してください。</p>
+        <div class="code-box"><code id="powlCode">PJ2KUNXHRTO</code><button class="btn secondary" type="button" id="copyBtn" style="width:auto;padding-left:18px;padding-right:18px">コピー</button></div>
+        <div class="copied" id="copiedMsg" aria-live="polite"></div>
+      </div>
+      <div class="link-card">
+        <h3>Amazonでのお買い物</h3>
+        <p>このアカウントはAmazonアソシエイトに参加しています。X（@pokatuotoku）の投稿でご紹介するAmazon商品リンクには、アソシエイトタグ（pokatuotoku-22）が付いています。リンク経由でお買い物いただくと、運営の応援になります。</p>
+        <a class="btn secondary" href="https://x.com/pokatuotoku" target="_blank" rel="noopener">Xでセール情報を見る →</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>このページは Xアカウント @pokatuotoku が、ポイントサイトの公開情報をもとにまとめたものです。掲載している金額は 2026年11月23日時点の情報です。金額・条件は変更される場合があります。お申し込み前に各公式ページでご確認ください。</p>
+    <p>金融商品（証券・FX・暗号資産など）には価格変動などのリスクがあります。ご利用は各サービスの公式情報をご確認のうえ、ご自身の判断でお願いします。月額料金や年会費がかかる案件は、還元額だけでなく総額でご検討ください。</p>
+    <p>本ページにはプロモーション（アフィリエイトリンク）が含まれます。</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var catBtns = document.querySelectorAll('.cat-filters button');
+  var easeBtns = document.querySelectorAll('.ease-filters button');
+  var sortBtns = document.querySelectorAll('.sort-filters button');
+  var list = document.getElementById('dealList');
+  var deals = Array.prototype.slice.call(document.querySelectorAll('#dealList .deal'));
+  var empty = document.getElementById('emptyMsg');
+  var sortNote = document.getElementById('sortNote');
+  var cat = 'all', ease = 'all', sortMode = 'power';
+  var EASY = ['open','notrade','free'];
+  function apply(){
+    var shown = 0;
+    deals.forEach(function(d){
+      var catOk = (cat === 'all' || d.getAttribute('data-cat') === cat);
+      var tokens = (d.getAttribute('data-ease') || '').split(' ').filter(Boolean);
+      var easeOk = true;
+      if (ease === 'easy') { easeOk = tokens.some(function(x){ return EASY.indexOf(x) >= 0; }); }
+      else if (ease !== 'all') { easeOk = tokens.indexOf(ease) >= 0; }
+      var ok = catOk && easeOk;
+      d.classList.toggle('hidden', !ok);
+      if (ok) shown++;
+    });
+    empty.classList.toggle('hidden', shown > 0);
+    var sorted = deals.slice().sort(function(a,b){
+      if (sortMode === 'deadline') {
+        var da = a.getAttribute('data-deadline') || '';
+        var db = b.getAttribute('data-deadline') || '';
+        if (da && db && da !== db) return da < db ? -1 : 1;
+        if (da && !db) return -1;
+        if (!da && db) return 1;
+      }
+      return (parseInt(a.getAttribute('data-order'),10) || 0) - (parseInt(b.getAttribute('data-order'),10) || 0);
+    });
+    sorted.forEach(function(d){ list.appendChild(d); });
+    if (sortNote) {
+      sortNote.textContent = sortMode === 'deadline'
+        ? '締切が近い順で並んでいます（左の数字は火力ランキングの順位です）。締切なし・未定の案件は後ろにまとめています。締切バッジの「あと○日」は2026年11月23日時点の目安です。'
+        : 'いまは火力順（還元額の高い順）で並んでいます。締切バッジの「あと○日」は2026年11月23日時点の目安です。';
+    }
+  }
+  catBtns.forEach(function(b){
+    b.addEventListener('click', function(){
+      catBtns.forEach(function(x){ x.setAttribute('aria-pressed','false'); });
+      b.setAttribute('aria-pressed','true');
+      cat = b.getAttribute('data-filter');
+      apply();
+    });
+  });
+  easeBtns.forEach(function(b){
+    b.addEventListener('click', function(){
+      easeBtns.forEach(function(x){ x.setAttribute('aria-pressed','false'); });
+      b.setAttribute('aria-pressed','true');
+      ease = b.getAttribute('data-ease-filter');
+      apply();
+    });
+  });
+  sortBtns.forEach(function(b){
+    b.addEventListener('click', function(){
+      sortBtns.forEach(function(x){ x.setAttribute('aria-pressed','false'); });
+      b.setAttribute('aria-pressed','true');
+      sortMode = b.getAttribute('data-sort');
+      apply();
+    });
+  });
+  var copyBtn = document.getElementById('copyBtn');
+  var msg = document.getElementById('copiedMsg');
+  copyBtn.addEventListener('click', function(){
+    var code = document.getElementById('powlCode').textContent.trim();
+    function done(){ msg.textContent = 'コピーしました ✓'; setTimeout(function(){ msg.textContent=''; }, 2500); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(code).then(done).catch(function(){ fallback(); });
+    } else { fallback(); }
+    function fallback(){
+      var ta = document.createElement('textarea');
+      ta.value = code; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch(e){ msg.textContent = 'コード：' + code; }
+      document.body.removeChild(ta);
+    }
+  });
+})();
+</script>
+</body>
+</html>
